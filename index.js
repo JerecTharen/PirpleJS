@@ -39,18 +39,36 @@ const _server = _http.createServer((req, resp) =>{
         pathnameString.slice(0, pathnameString.length - 1).toLowerCase()
         : pathnameString.toLowerCase();
 
-    //Send Response
-    switch(parsedPathnameString){
-        case '/hellothere':
-            resp.end('General Kenobi!!!!\n');
-            break;
-        default:
-            resp.end(responseString);
-            break;
-    }
-    
+    //Get query string object - NOTE: This is why we passed 'true' when parsing the url
+    let querystringObj = urlObj.query;
+
+    //Parse the method
+    let requestMethodString = req.method.toLocaleLowerCase();
+
+    //Send Response for get requests
+    if(requestMethodString === 'get')
+        switch(parsedPathnameString){
+            case '/hellothere':
+                resp.end('General Kenobi!!!!\n');
+                break;
+            default:
+                resp.end(responseString);
+                break;
+        }
+
+    //Send response for post requests
+    else if(requestMethodString === 'post')
+        switch(parsedPathnameString){
+            default:
+                resp.end(responseString);
+        }
+    //All other methods:
+    else
+        resp.end(responseString);
+
     //Log response
-    console.log(`Received paths - full path: "${pathnameString}", parsed: "${parsedPathnameString}"`);
+    console.log(`Received request path: "${pathnameString}", 
+        query: "${(()=>{console.log(querystringObj); return 'an object';})()}"`);
 });
 //Get the server to listen to our specified port
 _server.listen(_portNum, ()=>{
