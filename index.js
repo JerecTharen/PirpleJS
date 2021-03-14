@@ -13,6 +13,7 @@
 */
 const _http = require('http');
 const _fs = require('fs');
+const _stringDecoder = require('string_decoder').StringDecoder;
 
 /*
     =====================
@@ -50,7 +51,20 @@ const _server = _http.createServer((req, resp) =>{
 
     //Store the request headers
     let headersObj = req.headers;
-    console.log('debugging headers, ', headersObj);
+
+    //Decoding the request payload
+    let decoderObj = new _stringDecoder('utf-8');
+    let bufferString = '';
+    req.on('data', (data)=>{
+        bufferString += decoderObj.write(data);
+    });
+    //Log the payload
+    req.on('end', ()=>{
+        decoderObj.end();
+        console.log('payload was: ', bufferString);
+        console.log('Request sent with these headers: ', headersObj);
+    });
+
 
     //Send Response for get requests
     if(requestMethodString === 'get')
