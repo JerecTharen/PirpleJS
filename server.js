@@ -67,9 +67,8 @@ const _server = _http.createServer((req, resp) =>{
 
 
     //Send Response for get requests
-    if(requestMethodString === 'get'){
-        let allPathsArr = parsedPathnameString.split('/');
-        switch(allPathsArr[0]){
+    if(requestMethodString === 'get')
+        switch(parsedPathnameString){
             case '/hellothere':
                 resp.end('General Kenobi!!!!\n');
                 break;
@@ -77,7 +76,6 @@ const _server = _http.createServer((req, resp) =>{
                 resp.end(responseString);
                 break;
         }
-    }
 
     //Send response for post requests
     else if(requestMethodString === 'post')
