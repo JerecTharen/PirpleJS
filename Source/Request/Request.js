@@ -3,6 +3,7 @@
  * format for my other code to use. This is going to be slightly different from the code in the tutorial I'm
  * following. Mainly in that I'm separating everything out and trying to reduce callbacks.
  */
+ const _stringDecoder = require('string_decoder').StringDecoder;
 
  class Request{
     //constructor(stausCdeInt, hostnameStr, parsedPathnameStr, searchParamsObj, ){
@@ -10,8 +11,8 @@
       this.UrlObj = new URL(req.url, `http://${req.headers.host}`);
 
       //Parse the path and host
-      this.HostnameString = urlObj.hostname;
-      let pathnameString = urlObj.pathname;
+      this.HostnameString = this.UrlObj.hostname;
+      let pathnameString = this.UrlObj.pathname;
       //Don't care about removing head '/' characters, only care about removing trailing ones
       this.ParsedPathnameString = pathnameString.slice(pathnameString.length-1, pathnameString.length) === '/' ? 
           pathnameString.slice(0, pathnameString.length - 1).toLowerCase()
@@ -37,7 +38,7 @@
           decoderObj.end();
           console.log('payload was: ', bufferString);
           this.PayloadStr = bufferString;
-          console.log('Request sent with these headers: ', headersObj);
+          console.log('Request sent with these headers: ', this.HeadersObj);
       });
    }
  }

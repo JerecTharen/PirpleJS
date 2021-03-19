@@ -16,6 +16,13 @@ const _fs = require('fs');
 const _stringDecoder = require('string_decoder').StringDecoder;
 
 /*
+    =========================
+    Imported Internal Modules
+    =========================
+ */
+const _Request = require('./Source/Request/Request.js');
+
+/*
     =====================
     Application Constants
     =====================
@@ -32,43 +39,13 @@ Server set up
 const _server = _http.createServer((req, resp) =>{
     let responseString = 'Hello There!\nGeneral Kenobi!!!\n';
 
-    //Get URL and parse it
-    let urlObj = new URL(req.url, `http://${req.headers.host}`);
-
-    //Parse the path and host
-    let hostnameString = urlObj.hostname;
-    let pathnameString = urlObj.pathname;
-    //Don't care about removing head '/' characters, only care about removing trailing ones
-    let parsedPathnameString = pathnameString.slice(pathnameString.length-1, pathnameString.length) === '/' ? 
-        pathnameString.slice(0, pathnameString.length - 1).toLowerCase()
-        : pathnameString.toLowerCase();
-
-    //Get query string object - NOTE: this is separate from the 
-    let querystringObj = urlObj.searchParams;
-
-    //Parse the method
-    let requestMethodString = req.method.toLocaleLowerCase();
-
-    //Store the request headers
-    let headersObj = req.headers;
-
-    //Decoding the request payload
-    let decoderObj = new _stringDecoder('utf-8');
-    let bufferString = '';
-    req.on('data', (data)=>{
-        bufferString += decoderObj.write(data);
-    });
-    //Log the payload
-    req.on('end', ()=>{
-        decoderObj.end();
-        console.log('payload was: ', bufferString);
-        console.log('Request sent with these headers: ', headersObj);
-    });
+    
+    let Request = new _Request(req);
 
 
     //Send Response for get requests
-    if(requestMethodString === 'get'){
-        let allPathsArr = parsedPathnameString.split('/');
+    if(Request.RequestMethodString === 'get'){
+        let allPathsArr = Request.ParsedPathnameString.split('/');
         switch(allPathsArr[0]){
             case '/hellothere':
                 resp.end('General Kenobi!!!!\n');
@@ -80,8 +57,8 @@ const _server = _http.createServer((req, resp) =>{
     }
 
     //Send response for post requests
-    else if(requestMethodString === 'post')
-        switch(parsedPathnameString){
+    else if(Request.RequestMethodString === 'post')
+        switch(Request.ParsedPathnameString){
             default:
                 resp.end(responseString);
         }
@@ -92,10 +69,10 @@ const _server = _http.createServer((req, resp) =>{
     //Log response
     //Grab first querystring for testing purposes in logging statments, so get them in an array here
     let testQueryParamArr = [];
-    for(let nameString of querystringObj.keys())
+    for(let nameString of Request.QuerystringObj.keys())
         testQueryParamArr.push(nameString);
-    console.log(`Received request path: "${pathnameString}", host: "${hostnameString}"
-        query: "${querystringObj.get(testQueryParamArr[0])}"`);
+    console.log(`Received request path: "${Request.ParsedPathnameString}", host: "${Request.HostnameString}"
+        query: "${Request.QuerystringObj.get(testQueryParamArr[0])}"`);
 });
 //Get the server to listen to our specified port
 _server.listen(_portNum, ()=>{
