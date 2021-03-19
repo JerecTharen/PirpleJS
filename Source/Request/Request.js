@@ -5,9 +5,41 @@
  */
 
  class Request{
-    constructor(){
-        
-    }
+    //constructor(stausCdeInt, hostnameStr, parsedPathnameStr, searchParamsObj, ){
+   constructor(req){
+      this.UrlObj = new URL(req.url, `http://${req.headers.host}`);
+
+      //Parse the path and host
+      this.HostnameString = urlObj.hostname;
+      let pathnameString = urlObj.pathname;
+      //Don't care about removing head '/' characters, only care about removing trailing ones
+      this.ParsedPathnameString = pathnameString.slice(pathnameString.length-1, pathnameString.length) === '/' ? 
+          pathnameString.slice(0, pathnameString.length - 1).toLowerCase()
+          : pathnameString.toLowerCase();
+  
+      //Get query string object - NOTE: this is separate from the 
+      this.QuerystringObj = this.UrlObj.searchParams;
+  
+      //Parse the method
+      this.RequestMethodString = req.method.toLocaleLowerCase();
+  
+      //Store the request headers
+      this.HeadersObj = req.headers;
+  
+      //Decoding the request payload
+      let decoderObj = new _stringDecoder('utf-8');
+      let bufferString = '';
+      req.on('data', (data)=>{
+          bufferString += decoderObj.write(data);
+      });
+      //Log the payload
+      req.on('end', ()=>{
+          decoderObj.end();
+          console.log('payload was: ', bufferString);
+          this.PayloadStr = bufferString;
+          console.log('Request sent with these headers: ', headersObj);
+      });
+   }
  }
 
  module.exports = Request;
