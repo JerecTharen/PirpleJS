@@ -14,9 +14,11 @@
             let allPathsArr = this.Request.ParsedPathnameString.split('/');
             switch(allPathsArr[0]){
                 case '/hellothere':
+                    this.Resp.writeHead(200);
                     this.Resp.end('General Kenobi!!!!\n');
                     break;
                 default:
+                    this.Resp.writeHead(404);
                     this.Resp.end(responseString);
                     break;
             }
@@ -26,11 +28,14 @@
         else if(this.Request.RequestMethodString === 'post')
             switch(this.Request.ParsedPathnameString){
                 default:
+                    this.Resp.writeHead(200);
                     this.Resp.end(responseString);
             }
         //All other methods:
-        else
+        else{
+            this.Resp.writeHead(404);
             this.Resp.end(responseString);
+        }
     }
  }
 

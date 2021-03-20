@@ -4,6 +4,9 @@
 *
 * Programmer Note: In the lesson, the teacher uses url.parse(). Apparently that is depricated, so instead I'm
 * using the new WHATWG URL API instead (see where I'm using searchParams)
+* 
+* TODO: Send back JSON
+* TODO: Confirm that setting the on data end even in Request won't slow down when handling the payload in Router
 */
 
 /* 
@@ -38,8 +41,6 @@ Server set up
 */
 //Set server to respond to requests
 const _server = _http.createServer((req, resp) =>{
-    let responseString = 'Hello There!\nGeneral Kenobi!!!\n';
-
     
     let Request = new _Request(req);
 
