@@ -21,6 +21,7 @@ const _stringDecoder = require('string_decoder').StringDecoder;
     =========================
  */
 const _Request = require('./Source/Request/Request.js');
+const _Router = require('./Source/Router/Router.js');
 
 /*
     =====================
@@ -42,29 +43,7 @@ const _server = _http.createServer((req, resp) =>{
     
     let Request = new _Request(req);
 
-
-    //Send Response for get requests
-    if(Request.RequestMethodString === 'get'){
-        let allPathsArr = Request.ParsedPathnameString.split('/');
-        switch(allPathsArr[0]){
-            case '/hellothere':
-                resp.end('General Kenobi!!!!\n');
-                break;
-            default:
-                resp.end(responseString);
-                break;
-        }
-    }
-
-    //Send response for post requests
-    else if(Request.RequestMethodString === 'post')
-        switch(Request.ParsedPathnameString){
-            default:
-                resp.end(responseString);
-        }
-    //All other methods:
-    else
-        resp.end(responseString);
+    let Router = new _Router(Request, resp);
 
     //Log response
     //Grab first querystring for testing purposes in logging statments, so get them in an array here
