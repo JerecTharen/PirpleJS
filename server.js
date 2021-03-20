@@ -43,8 +43,22 @@ Server set up
 const _server = _http.createServer((req, resp) =>{
     
     let Request = new _Request(req);
+    let Router;
 
-    let Router = new _Router(Request, resp);
+    //Decoding the request payload
+    let decoderObj = new _stringDecoder('utf-8');
+    let bufferString = '';
+    req.on('data', (data)=>{
+        bufferString += decoderObj.write(data);
+    });
+    //Log the payload
+    req.on('end', ()=>{
+        decoderObj.end();
+        console.log('payload was: ', bufferString);
+        Request.PayloadStr = bufferString;
+        console.log('Request sent with these headers: ', Request.HeadersObj);
+        Router = new _Router(Request, resp);
+    });
 
     //Log response
     //Grab first querystring for testing purposes in logging statments, so get them in an array here
