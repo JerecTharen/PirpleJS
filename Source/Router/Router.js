@@ -2,8 +2,8 @@
  * This class is meant to handle routing after the request has been parsed (see Request.js).
  * It will consume Request objects.
  * 
- * TODO: Separate each top level switch into a different area, then each area will have a map of controllers.
- *      The controllers will handle the requests
+ * TODO: Separate each top level switch into a different areas, then each area will have a map of controllers.
+ *      The controller will handle the requests. Trying to stick with what I know and do an MVC pattern.
  */
 const _fs = require('fs');
 
@@ -18,14 +18,10 @@ const _fs = require('fs');
             let allPathsArr = this.Request.ParsedPathnameString.split('/');
             switch(allPathsArr[0]){
                 case '/hellothere':
-                    this.Resp.setHeader('Content-Type', 'text/html');
-                    this.Resp.writeHead(200);
-                    this.Resp.end('General Kenobi!!!!\n');
+                    this.SendResponse(200, 'General Kenobi!!!!\n');
                     break;
                 default:
-                    this.Resp.setHeader('Content-Type', 'text/html');
-                    this.Resp.writeHead(404);
-                    this.Resp.end(defaultResponseString);
+                    this.SendResponse(404, defaultResponseString);
                     break;
             }
         }
@@ -34,23 +30,42 @@ const _fs = require('fs');
         else if(this.Request.RequestMethodString === 'post')
             switch(this.Request.ParsedPathnameString){
                 case '/test':
-                    let testJsonString = _fs.readFileSync('./.DATA/test.json');
-                    this.Resp.setHeader('Content-Type', 'application/json');
-                    this.Resp.writeHead(200);
-                    this.Resp.end(testJsonString);
+                    let testJsonObj = JSON.parse(_fs.readFileSync('./.DATA/test.json'));
+                    let payloadName = this.Request.PayloadStr.split('=')[1];//TODO: actual parse the payload
+                    //Set the payload name on the object from the file and send that to the consumer
+                    testJsonObj.name = payloadName === '' ? testJsonObj.name : payloadName;
+                    this.SendResponse(200, undefined, testJsonObj);
                     break;
                 default:
-                    this.Resp.setHeader('Content-Type', 'text/html');
-                    this.Resp.writeHead(404);
-                    this.Resp.end(defaultResponseString);
+                    this.SendResponse(404, defaultResponseString);
                     break;
             }
         //All other methods:
         else{
-            this.Resp.setHeader('Content-Type', 'text/html');
-            this.Resp.writeHead(404);
-            this.Resp.end(defaultResponseString);
+            this.SendResponse(404, defaultResponseString);
         }
+    }
+
+    //Sets headers and sends response back to requester
+    //Defaults to sending back plain text
+    SendResponse(statusCodeNum = 404, textString = '', jsonObj = {}){
+        //Set up headers
+        let contentTypeString = '';
+        let responsePayloadString = '';
+        if(Object.keys(jsonObj).length !== 0){
+            contentTypeString = 'application/json';
+            responsePayloadString = JSON.stringify(jsonObj);
+        }
+        else{
+            contentTypeString = 'text/html';
+            responsePayloadString = textString;
+        }
+        
+        //Send response
+        this.Resp.setHeader('Content-Type', contentTypeString);
+        this.Resp.writeHead(statusCodeNum);
+        this.Resp.end(responsePayloadString);
+
     }
  }
 
