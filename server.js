@@ -23,6 +23,7 @@ const _stringDecoder = require('string_decoder').StringDecoder;
     Imported Internal Modules
     =========================
  */
+const _config = require('./config.js');
 const _Request = require('./Source/Request/Request.js');
 const _Router = require('./Source/Router/Router.js');
 
@@ -31,7 +32,7 @@ const _Router = require('./Source/Router/Router.js');
     Application Constants
     =====================
 */
-const _portNum = 3000;
+const _portNum = _config.port;
 
 
 /*
@@ -70,6 +71,6 @@ const _server = _http.createServer((req, resp) =>{
 });
 //Get the server to listen to our specified port
 _server.listen(_portNum, ()=>{
-    console.log(`Server is listening on port ${_portNum}`);
+    console.log(`Server is listening on port ${_portNum} for environment ${_config.env_name}`);
 
 });
