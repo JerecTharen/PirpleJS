@@ -59,6 +59,7 @@ const _server = _http.createServer((req, resp) =>{
         Request.PayloadStr = bufferString;
         console.log('Request sent with these headers: ', Request.HeadersObj);
         Router = new _Router(Request, resp);
+        Router.HandleResponse();
     });
 
     //Log response
@@ -69,6 +70,9 @@ const _server = _http.createServer((req, resp) =>{
     console.log(`Received request path: "${Request.ParsedPathnameString}", host: "${Request.HostnameString}"
         query: "${Request.QuerystringObj.get(testQueryParamArr[0])}"`);
 });
+
+
+
 //Get the server to listen to our specified port
 _server.listen(_portNum, ()=>{
     console.log(`Server is listening on port ${_portNum} for environment ${_config.env_name}`);
