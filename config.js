@@ -5,12 +5,14 @@
 let environments = {};
 
 environments.develop = {
-    'port' : 3000,
+    'httpPort' : 3000,
+    'httpsPort' : 3030,
     'env_name' : 'develop'
 };
 
 environments.production = {
-    'port' : 5000,
+    'httpPort' : 5000,
+    'httpsPort' : 5050,
     'env_name' : 'production'
 };
 
