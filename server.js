@@ -108,6 +108,7 @@ function HandleServerLogic(req, resp){
         console.log('payload was: ', bufferString);
         Request.PayloadStr = bufferString;
         console.log('Request sent with these headers: ', Request.HeadersObj);
+        console.log('Request method: ', Request.RequestMethodString);
         Router = new _Router(Request, resp);
         Router.HandleResponse();
     });

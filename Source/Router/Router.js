@@ -8,7 +8,7 @@
 const _fs = require('fs');
 
  class Router{
-    constructor(request, resp, defaultResponseString = 'Hello There!\nGeneral Kenobi!!!\n'){
+    constructor(request, resp, defaultResponseString = '\nHello There!\nGeneral Kenobi!!!\n'){
         this.Request = request;
         this.Resp = resp;
         this.DefaultResponseString = defaultResponseString;
@@ -31,9 +31,12 @@ const _fs = require('fs');
 
     HandleGet(){
         let allPathsArr = this.Request.ParsedPathnameString.split('/');
-        switch(allPathsArr[0]){
-            case '/hellothere':
+        switch(allPathsArr[1]){
+            case 'hellothere':
                 this.SendResponse(200, 'General Kenobi!!!!\n');
+                break;
+            case 'ping':
+                this.SendResponse(200, 'Server Online');
                 break;
             default:
                 this.SendResponse(404, this.DefaultResponseString);
@@ -43,7 +46,7 @@ const _fs = require('fs');
 
     HandlePost(){
         switch(this.Request.ParsedPathnameString){
-            case '/test':
+            case 'test':
                 let testJsonObj = JSON.parse(_fs.readFileSync('./.DATA/test.json'));
                 let payloadName = this.Request.PayloadStr.split('=')[1];//TODO: actual parse the payload
                 //Set the payload name on the object from the file and send that to the consumer
