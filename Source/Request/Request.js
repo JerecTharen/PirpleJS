@@ -27,19 +27,7 @@
       //Store the request headers
       this.HeadersObj = req.headers;
   
-      //Decoding the request payload
-      let decoderObj = new _stringDecoder('utf-8');
-      let bufferString = '';
-      req.on('data', (data)=>{
-          bufferString += decoderObj.write(data);
-      });
-      //Log the payload
-      req.on('end', ()=>{
-          decoderObj.end();
-          console.log('payload was: ', bufferString);
-          this.PayloadStr = bufferString;
-          console.log('Request sent with these headers: ', this.HeadersObj);
-      });
+      
    }
  }
 

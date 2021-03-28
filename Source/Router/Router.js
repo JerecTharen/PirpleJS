@@ -5,13 +5,18 @@
  * TODO: Separate each top level switch into a different areas, then each area will have a map of controllers.
  *      The controller will handle the requests. Trying to stick with what I know and do an MVC pattern.
  */
+//Node Dependencies
 const _fs = require('fs');
+
+//Internal Dependencies
+const _data = require('../Data/Data.js');
 
  class Router{
     constructor(request, resp, defaultResponseString = '\nHello There!\nGeneral Kenobi!!!\n'){
         this.Request = request;
         this.Resp = resp;
-        this.DefaultResponseString = defaultResponseString;
+        this.DefaultResponseString = defaultResponseString; 
+        this.DataObj = new _data();
     }
 
     //Factored out controller logic by method into methods so not to be in the constructor
@@ -46,12 +51,33 @@ const _fs = require('fs');
 
     HandlePost(){
         switch(this.Request.ParsedPathnameString){
-            case 'test':
+            case '/test':
                 let testJsonObj = JSON.parse(_fs.readFileSync('./.DATA/test.json'));
                 let payloadName = this.Request.PayloadStr.split('=')[1];//TODO: actual parse the payload
                 //Set the payload name on the object from the file and send that to the consumer
                 testJsonObj.name = payloadName === '' ? testJsonObj.name : payloadName;
                 this.SendResponse(200, undefined, testJsonObj);
+                break;
+            case '/memequotes':
+                this.DataObj.Create('MemeQuotes', 'PrequalMeme1',
+                    //Simple little object for testing purposes 
+                    {
+                        "QuoteName" : "Hello There",
+                        "QuoteLines" : [
+                            "Hello There",
+                            "General Kenobi! You are a bold one."
+                        ]
+                    }, (err)=>{
+                        //Errors come back as strings, log them appropriately
+                        if(typeof(err) === 'string')
+                        {
+                            console.error(err);
+                            this.SendResponse(500, '\nInternal Server Error', undefined);
+                        }
+                        //Success is a boolean, respond as needed
+                        else
+                            this.SendResponse(200, '\nFile Created Successfully', undefined);
+                    });
                 break;
             default:
                 this.SendResponse(404, this.DefaultResponseString);
