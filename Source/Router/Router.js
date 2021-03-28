@@ -43,6 +43,17 @@ const _data = require('../Data/Data.js');
             case 'ping':
                 this.SendResponse(200, 'Server Online');
                 break;
+            case 'memequotes':
+                this.DataObj.Read('MemeQuotes', 'PrequalMeme1', (err, data)=>{
+                    if(err){
+                        console.error(err);
+                        this.SendResponse(500, '\nInternal Server Error.');
+                    }
+                    else{
+                        this.SendResponse(200, undefined, JSON.parse(data));
+                    }
+                });
+                break;
             default:
                 this.SendResponse(404, this.DefaultResponseString);
                 break;
@@ -50,15 +61,16 @@ const _data = require('../Data/Data.js');
     }
 
     HandlePost(){
-        switch(this.Request.ParsedPathnameString){
-            case '/test':
+        let allPathsArr = this.Request.ParsedPathnameString.split('/');
+        switch(allPathsArr[1]){
+            case 'test':
                 let testJsonObj = JSON.parse(_fs.readFileSync('./.DATA/test.json'));
                 let payloadName = this.Request.PayloadStr.split('=')[1];//TODO: actual parse the payload
                 //Set the payload name on the object from the file and send that to the consumer
                 testJsonObj.name = payloadName === '' ? testJsonObj.name : payloadName;
                 this.SendResponse(200, undefined, testJsonObj);
                 break;
-            case '/memequotes':
+            case 'memequotes':
                 this.DataObj.Create('MemeQuotes', 'PrequalMeme1',
                     //Simple little object for testing purposes 
                     {

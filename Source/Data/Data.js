@@ -38,7 +38,12 @@ class Data{
                 callbackFunc('Could not create file, it may already exist');
             }
         });
+    }
 
+    Read(dirNameStr, fileNameStr, callbackFunc){
+        _fs.readFile(`${this.BASE_DIR_STR}/${dirNameStr}/${fileNameStr}.json`, 'utf8', (err, data)=>{
+            callbackFunc(err, data);
+        });
     }
 
 
