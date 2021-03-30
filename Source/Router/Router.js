@@ -79,17 +79,34 @@ const _data = require('../Data/Data.js');
                             "Hello There",
                             "General Kenobi! You are a bold one."
                         ]
-                    }, (err)=>{
-                        //Errors come back as strings, log them appropriately
-                        if(typeof(err) === 'string')
-                        {
-                            console.error(err);
-                            this.SendResponse(500, '\nInternal Server Error', undefined);
-                        }
-                        //Success is a boolean, respond as needed
+                    }
+                )
+                .then((err, fileDesc, dataStr) =>{
+                    let writePromise = new Promise((resolve, reject) => {
+                        if(err)
+                            reject('Error writing to new file');
                         else
-                            this.SendResponse(200, '\nFile Created Successfully', undefined);
+                            _fs.close(fileDesc, resolve(err, dataStr));
                     });
+                    return writePromise;
+                })
+                .then((err, dataStr) =>{
+                    let closePromise = new Promise((resolve, reject) => {
+                        if(err)
+                            reject('Error closing file');
+                        else
+                            resolve(dataStr);//Everything worked succesfully
+                    });
+                    return closePromise;
+                })
+                .then((dataStr) => {
+                    console.log('wrote :', dataStr)
+                    this.SendResponse(200, '\nFile Created Successfully', undefined);
+                })
+                .catch((err) => {
+                    console.error(err);
+                    this.SendResponse(500, '\nInternal Server Error', undefined);
+                });
                 break;
             default:
                 this.SendResponse(404, this.DefaultResponseString);
