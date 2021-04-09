@@ -81,26 +81,8 @@ const _data = require('../Data/Data.js');
                         ]
                     }
                 )
-                .then((err, fileDesc, dataStr) =>{
-                    let writePromise = new Promise((resolve, reject) => {
-                        if(err)
-                            reject('Error writing to new file');
-                        else
-                            _fs.close(fileDesc, resolve(err, dataStr));
-                    });
-                    return writePromise;
-                })
-                .then((err, dataStr) =>{
-                    let closePromise = new Promise((resolve, reject) => {
-                        if(err)
-                            reject('Error closing file');
-                        else
-                            resolve(dataStr);//Everything worked succesfully
-                    });
-                    return closePromise;
-                })
                 .then((dataStr) => {
-                    console.log('wrote :', dataStr)
+                    console.log(dataStr);
                     this.SendResponse(200, '\nFile Created Successfully', undefined);
                 })
                 .catch((err) => {

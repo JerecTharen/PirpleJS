@@ -18,8 +18,13 @@ const _path = require('path');
 class Data{
     constructor(){
         this.BASE_DIR_STR = _path.join(__dirname, '../../.Data/');
+        //Used to pass data between promises
+        this.fileDesc;
+        this.filePathStr;
+        this.dataStr;
     }
 
+    //TODO: Fix scope mess
     //Write JSON data to a file
     Create(dirNameStr, fileNameStr, dataObj){
         //Open directory
@@ -27,14 +32,35 @@ class Data{
             _fs.open(`${this.BASE_DIR_STR}/${dirNameStr}/${fileNameStr}.json`, 'wx', (err, fileDesc)=>{
                 if(!err && fileDesc){
                     let dataStr = JSON.stringify(dataObj);
-                    _fs.writeFile(fileDesc, dataStr, (err) => resolve(err, fileDesc, dataStr));
+                    this.fileDesc = fileDesc;
+                    _fs.writeFile(fileDesc, dataStr, (err) => resolve(err));
                 }
                 else
                     reject('Could not create file, it may already exist');
                 return openPromise;
             });
         });
-        return openPromise;
+
+        return openPromise
+            .then((err) =>{
+                err = false;
+                let writePromise = new Promise((resolve, reject) => {
+                    if(err)
+                        reject('Error writing to new file');
+                    else
+                        _fs.close(this.fileDesc, resolve(err));
+                });
+                return writePromise;
+            })
+            .then((err) =>{
+                let closePromise = new Promise((resolve, reject) => {
+                    if(err)
+                        reject('Error closing file');
+                    else
+                        resolve('File Created Successfully');
+                });
+                return closePromise;
+            });
     }
 
     //One callback won't hurt, will it?
@@ -44,7 +70,42 @@ class Data{
         });
     }
 
-    Update(dirNameStr, fileNameStr, data, callbackFunc){
+    Update(dirNameStr, fileNameStr, dataOjb){
+        this.filePathStr = `${this.BASE_DIR_STR}/${dirNameStr}/${fileNameStr}.json`;
+        this.dataStr = JSON.stringify(dataObj);
+        let openPromise = new Promise((resolve, reject) => {
+            _fs.open(this.filePathStr, 'r+', (err, fileDesc) =>{
+                if(!err && fileDesc)
+                    _fs.truncate(this.filePathStr, (err) => resolve(err));
+                else
+                    reject('Error opening file.');
+            });
+        });
+
+        return openPromise
+            .then((err) => {
+                let writePromise = new Promise((resolve, reject) => {
+
+                    
+                    if(err)
+                        reject('Error truncating file');
+                    else
+                        _fs.writeFile(this.filePathStr, this.dataStr, (err) => resolve(err));
+                });
+
+                return writePromise;
+            })
+            .then((err) => {
+                let closePromise = new Promise((resolve, reject) => {
+                    if(err)
+                        reject('');
+                    _fs.close(this.fileDesc, () => {
+                        resolve('File Updated Successfully');
+                    });
+                });
+
+                return closePromise;
+            });
 
     }
 
