@@ -7,6 +7,7 @@
  */
 //Node Dependencies
 const _fs = require('fs');
+const Data = require('../Data/Data.js');
 
 //Internal Dependencies
 const _data = require('../Data/Data.js');
@@ -71,7 +72,7 @@ const _data = require('../Data/Data.js');
                 this.SendResponse(200, undefined, testJsonObj);
                 break;
             case 'memequotes':
-                this.DataObj.Create('MemeQuotes', 'PrequalMeme1',
+                this.DataObj.WriteOrUpdate('MemeQuotes', 'PrequalMeme1',
                     //Simple little object for testing purposes 
                     {
                         "QuoteName" : "Hello There",
@@ -83,10 +84,10 @@ const _data = require('../Data/Data.js');
                 )
                 .then((dataStr) => {
                     console.log(dataStr);
-                    this.SendResponse(200, '\nFile Created Successfully', undefined);
+                    this.SendResponse(200, '\n' + dataStr, undefined);
                 })
                 .catch((err) => {
-                    console.error(err);
+                    console.error(`Error: ${err.Message} \nRejection Reason : ${err.Reason}`);
                     this.SendResponse(500, '\nInternal Server Error', undefined);
                 });
                 break;

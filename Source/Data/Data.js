@@ -22,40 +22,53 @@ class Data{
         this.fileDesc;
         this.filePathStr;
         this.dataStr;
+        this.error;
+        this.returnPromise;
+        this.dataObj;
+        //Enum of reasons there was an error
+        this.RejectionReasonEnum = {
+            FileExistsError : 0,
+            FileWriteError: 1,
+            FileCloseError : 2,
+            FileOpenError : 3,
+            FileTruncateError : 4,
+            FileCloseError : 5
+        };
     }
 
-    //TODO: Fix scope mess
     //Write JSON data to a file
-    Create(dirNameStr, fileNameStr, dataObj){
+    Create(){
         //Open directory
         let openPromise = new Promise((resolve, reject) =>{
-            _fs.open(`${this.BASE_DIR_STR}/${dirNameStr}/${fileNameStr}.json`, 'wx', (err, fileDesc)=>{
+            _fs.open(this.filePathStr, 'wx', (err, fileDesc)=>{
                 if(!err && fileDesc){
-                    let dataStr = JSON.stringify(dataObj);
+                    let dataStr = JSON.stringify(this.dataObj);
                     this.fileDesc = fileDesc;
                     _fs.writeFile(fileDesc, dataStr, (err) => resolve(err));
                 }
                 else
-                    reject('Could not create file, it may already exist');
-                return openPromise;
+                    reject(new DataErrorModel('Could not create file, it may already exist',
+                     this.RejectionReasonEnum.FileExistsError));
+                });
             });
-        });
 
         return openPromise
             .then((err) =>{
-                err = false;
+                this.error = err;//Need to set this to have access to it inside the promise
                 let writePromise = new Promise((resolve, reject) => {
-                    if(err)
-                        reject('Error writing to new file');
+                    if(this.error)
+                        reject(new DataErrorModel('Error writing to new file',
+                         this.RejectionReasonEnum.FileWriteError));
                     else
-                        _fs.close(this.fileDesc, resolve(err));
+                        _fs.close(this.fileDesc, (err2) => resolve(err2));
                 });
                 return writePromise;
             })
             .then((err) =>{
+                this.error = err;//Need to set this to have access to it inside the promise
                 let closePromise = new Promise((resolve, reject) => {
-                    if(err)
-                        reject('Error closing file');
+                    if(this.error)
+                        reject(new DataErrorModel('Error closing file', this.RejectionReasonEnum.FileCloseError));
                     else
                         resolve('File Created Successfully');
                 });
@@ -70,46 +83,85 @@ class Data{
         });
     }
 
-    Update(dirNameStr, fileNameStr, dataOjb){
+    //TODO: get logic of either writing or updating correct
+    //TODO: fix bug of updating to empty object
+    WriteOrUpdate(dirNameStr, fileNameStr, dataObj){
+        this.dataObj = dataObj;
         this.filePathStr = `${this.BASE_DIR_STR}/${dirNameStr}/${fileNameStr}.json`;
-        this.dataStr = JSON.stringify(dataObj);
+        return new Promise((resolve, reject) => {
+            _fs.access(this.filePathStr, (err) => {
+                if(err){
+                    console.log('creating');
+                    this.Create().then((err) => resolve(err)).catch((err) => reject(err));
+                }
+                else{
+                    console.log('updating');
+                    this.Update().then((err) => resolve(err)).catch((err) => reject(err));
+                }
+            });
+        });
+    }
+
+    Update(){
+        this.dataStr = JSON.stringify(this.dataObj);
         let openPromise = new Promise((resolve, reject) => {
             _fs.open(this.filePathStr, 'r+', (err, fileDesc) =>{
+                this.fileDesc = fileDesc;
                 if(!err && fileDesc)
-                    _fs.truncate(this.filePathStr, (err) => resolve(err));
+                    _fs.truncate(this.filePathStr, (err2) => resolve(err2));
                 else
-                    reject('Error opening file.');
+                    reject(new DataErrorModel('Error opening file.', this.RejectionReasonEnum.FileOpenError));
             });
         });
 
         return openPromise
             .then((err) => {
-                let writePromise = new Promise((resolve, reject) => {
-
-                    
-                    if(err)
-                        reject('Error truncating file');
+                this.error = err;//Need to set this to have access to it inside the promise
+                let truncatePromise = new Promise((resolve, reject) => {
+                    if(this.error)
+                        reject(new DataErrorModel('Error truncating file',
+                         this.RejectionReasonEnum.FileTruncateError));
                     else
-                        _fs.writeFile(this.filePathStr, this.dataStr, (err) => resolve(err));
+                        _fs.writeFile(this.filePathStr, this.dataStr, (err2) => resolve(err2));
                 });
 
-                return writePromise;
+                return truncatePromise;
             })
             .then((err) => {
-                let closePromise = new Promise((resolve, reject) => {
-                    if(err)
-                        reject('');
-                    _fs.close(this.fileDesc, () => {
-                        resolve('File Updated Successfully');
-                    });
-                });
+                this.error = err;//Need to set this to have access to it inside the promise
+                let writePromise = new Promise((resolve, reject) => {
+                    this.resolve = resolve;
+                    if(this.error)
+                    {
+                        reject(new DataErrorModel('Error writing back to file',
+                        this.RejectionReasonEnum.FileWriteError));
+                    }
 
+                    else{
+                        _fs.close(this.fileDesc, (err2) => this.resolve(err2));
+                    }
+                   
+                });
+                return writePromise;
+            })
+            .then((err) =>{
+                this.error = err;//Need to set this to have access to it inside the promise
+                let closePromise = new Promise((resolve, reject) => {
+                    if(this.error)
+                        reject(new DataErrorModel('Error closing file', this.RejectionReasonEnum.FileCloseError));
+                    else
+                        resolve('File Updated Successfully');
+                });
                 return closePromise;
             });
-
     }
+}
 
-
+class DataErrorModel {
+    constructor(message, reason){
+        this.Message = message;
+        this.Reason = reason;
+    }
 }
 
 module.exports = Data;
