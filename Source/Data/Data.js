@@ -4,9 +4,6 @@
  * You'll notice this file is a bit different than the instructors, I ended up
  * looking up how to use promises to reduce the number of callbacks. See the router
  * where this is used for all of my .then() statements that continues the chain.
- * 
- * TODO: Figure out if I can get the rest of the _fs calls in that router switch
- * into here.
  */
 
 //NodeJS Module Dependencies
@@ -83,8 +80,6 @@ class Data{
         });
     }
 
-    //TODO: get logic of either writing or updating correct
-    //TODO: fix bug of updating to empty object
     WriteOrUpdate(dirNameStr, fileNameStr, dataObj){
         this.dataObj = dataObj;
         this.filePathStr = `${this.BASE_DIR_STR}/${dirNameStr}/${fileNameStr}.json`;
