@@ -30,14 +30,27 @@ const _data = require('../Data/Data.js');
         //Send response for post requests
         else if(this.Request.RequestMethodString === 'post')
             this.HandlePost();
+        //Send response for delete requests
+        else if(this.Request.RequestMethodString === 'delete')
+            this.HandleDelete();
         //All other methods:
         else
-            this.SendResponse(404, defaultResponseString);
+            this.SendResponse(404, this.DefaultResponseString);
     }
 
     HandleGet(){
-        let allPathsArr = this.Request.ParsedPathnameString.split('/');
+        let allPathsArr = this.GetAllPathsArr();
         switch(allPathsArr[1]){
+            case undefined:
+                this.DataObj.Read('../', 'index', (err, data) => {
+                    if(err){
+                        console.error(err);
+                        this.SendResponse(500, '\nInternal Server Error', undefined);
+                    }
+                    else
+                        this.SendResponse(200, data, undefined);
+                }, 'html');
+                break;
             case 'hellothere':
                 this.SendResponse(200, 'General Kenobi!!!!\n');
                 break;
@@ -62,7 +75,7 @@ const _data = require('../Data/Data.js');
     }
 
     HandlePost(){
-        let allPathsArr = this.Request.ParsedPathnameString.split('/');
+        let allPathsArr = this.GetAllPathsArr();
         switch(allPathsArr[1]){
             case 'test':
                 let testJsonObj = JSON.parse(_fs.readFileSync('./.DATA/test.json'));
@@ -95,6 +108,30 @@ const _data = require('../Data/Data.js');
                 this.SendResponse(404, this.DefaultResponseString);
                 break;
         }
+    }
+
+    HandleDelete(){
+        let allPathsArr =this.GetAllPathsArr();8
+        switch(allPathsArr[1]){
+            case 'memequotes':
+                this.DataObj.Delete('MemeQuotes', 'PrequalMeme1')
+                .then((msg) => {
+                    console.log(msg);
+                    this.SendResponse(200, '\nFile Deleted Successfully', undefined);
+                })
+                .catch((errObj) => {
+                    console.error(errObj.Message);
+                    this.SendResponse(500, '\nInternal Server Error', undefined);
+                });
+                break;
+            default:
+                this.SendResponse(404, this.DefaultResponseString);
+                break;
+        }
+    }
+
+    GetAllPathsArr(){
+        return this.Request.ParsedPathnameString.split('/');
     }
 
     //Sets headers and sends response back to requester

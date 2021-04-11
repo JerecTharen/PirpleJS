@@ -29,7 +29,8 @@ class Data{
             FileCloseError : 2,
             FileOpenError : 3,
             FileTruncateError : 4,
-            FileCloseError : 5
+            FileCloseError : 5,
+            FileUnlinkError : 6,
         };
     }
 
@@ -74,15 +75,15 @@ class Data{
     }
 
     //One callback won't hurt, will it?
-    Read(dirNameStr, fileNameStr, callbackFunc){
-        _fs.readFile(`${this.BASE_DIR_STR}/${dirNameStr}/${fileNameStr}.json`, 'utf8', (err, data)=>{
+    Read(dirNameStr, fileNameStr, callbackFunc, fileTypeStr ='json'){
+        _fs.readFile(this.GetFilePathString(dirNameStr, fileNameStr, fileTypeStr), 'utf8', (err, data)=>{
             callbackFunc(err, data);
         });
     }
 
     WriteOrUpdate(dirNameStr, fileNameStr, dataObj){
         this.dataObj = dataObj;
-        this.filePathStr = `${this.BASE_DIR_STR}/${dirNameStr}/${fileNameStr}.json`;
+        this.filePathStr = this.GetFilePathString(dirNameStr, fileNameStr);
         return new Promise((resolve, reject) => {
             _fs.access(this.filePathStr, (err) => {
                 if(err){
@@ -149,6 +150,25 @@ class Data{
                 });
                 return closePromise;
             });
+    }
+
+    Delete(dirNameStr, fileNameStr){
+        this.filePathStr = this.GetFilePathString(dirNameStr, fileNameStr);
+        let unlinkPromise = new Promise((resolve, reject) => {
+            _fs.unlink(this.filePathStr, (err) => {
+                if(err)
+                    reject(new DataErrorModel('There was an error unlinking the file.',
+                     this.RejectionReasonEnum.FileUnlinkError));
+                else
+                    resolve('File Deleted successfully.');
+            });
+        });
+
+        return unlinkPromise;
+    }
+
+    GetFilePathString(dirNameStr, fileNameStr, extentionStr = 'json'){
+        return `${this.BASE_DIR_STR}/${dirNameStr}/${fileNameStr}.${extentionStr}`;
     }
 }
 
