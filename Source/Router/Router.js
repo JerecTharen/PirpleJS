@@ -4,6 +4,12 @@
  * 
  * TODO: Separate each top level switch into a different areas, then each area will have a map of controllers.
  *      The controller will handle the requests. Trying to stick with what I know and do an MVC pattern.
+ * 
+ * TODO: consider handling requests by route first, then by method
+ * 
+ * NOTE: While the above TODO's are being implemented, this class is going to be acting a little bit like
+ * a controller. That will change however as I move things around and decie how my controller architecture
+ * will look like.
  */
 //Node Dependencies
 const _fs = require('fs');
@@ -11,6 +17,7 @@ const Data = require('../Data/Data.js');
 
 //Internal Dependencies
 const _data = require('../Data/Data.js');
+const _userController = require('../Areas/User/UserController.js');
 
  class Router{
     constructor(request, resp, defaultResponseString = '\nHello There!\nGeneral Kenobi!!!\n'){
@@ -18,12 +25,30 @@ const _data = require('../Data/Data.js');
         this.Resp = resp;
         this.DefaultResponseString = defaultResponseString; 
         this.DataObj = new _data();
+        this.RegisteredControllersObj = {};//Keep registered Areas here
+        this.ControllerNameArr = [];//Keep a list of string to look through when routing
+
+        //Register all the controllers
+        this.RegisterController(new _userController());
+    }
+
+    //Adds the controller to the registered list and saves the index on the object
+    RegisterController(controller){
+        this.RegisteredControllersObj[controller.ControllerNameStr] = controller;
+        this.ControllerNameArr.push(controller.ControllerNameStr);
+        controller.SetIndexFromArray(this.ControllerNameArr);
     }
 
     //Factored out controller logic by method into methods so not to be in the constructor
     //This will help it be more clear that the class will handle requests by calling this
     //instead of just running it when the class is instantiated.
     HandleResponse(){
+        let allPathsArr = this.GetAllPathsArr();
+        //Check if the path has been registered as a controller first
+        if(this.RegisteredControllersObj[allPathsArr[1]] !== undefined){
+            this.RegisteredControllersObj[allPathsArr[1]].HandleResponse(/*Pass stuff in here about the request*/);
+        }
+
         //Send Response for get requests
         if(this.Request.RequestMethodString === 'get')
             this.HandleGet();
