@@ -10,6 +10,9 @@
  * NOTE: While the above TODO's are being implemented, this class is going to be acting a little bit like
  * a controller. That will change however as I move things around and decie how my controller architecture
  * will look like.
+ * 
+ * TODO: Make more efficient by having areas and everything registered beforehand so that we don't do it for
+ * every request
  */
 //Node Dependencies
 const _fs = require('fs');
@@ -36,7 +39,7 @@ const _userController = require('../Areas/User/UserController.js');
     RegisterController(controller){
         this.RegisteredControllersObj[controller.ControllerNameStr] = controller;
         this.ControllerNameArr.push(controller.ControllerNameStr);
-        controller.SetIndexFromArray(this.ControllerNameArr);
+        controller.SetRegistrationOnController(this.ControllerNameArr, this.Request, this.Resp);
     }
 
     //Factored out controller logic by method into methods so not to be in the constructor
@@ -45,8 +48,9 @@ const _userController = require('../Areas/User/UserController.js');
     HandleResponse(){
         let allPathsArr = this.GetAllPathsArr();
         //Check if the path has been registered as a controller first
-        if(this.RegisteredControllersObj[allPathsArr[1]] !== undefined){
-            this.RegisteredControllersObj[allPathsArr[1]].HandleResponse(/*Pass stuff in here about the request*/);
+        if(this.RegisteredControllersObj[allPathsArr[1]] !== undefined && allPathsArr[2] !== undefined){
+            let relavantPathsArr = allPathsArr.slice(2,allPathsArr.length);
+            this.RegisteredControllersObj[allPathsArr[1]].HandleResponse(relavantPathsArr);
         }
 
         //Send Response for get requests

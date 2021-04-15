@@ -8,6 +8,10 @@ class UserController extends Controller{
         this.ControllerNameStr = "User";
     }
 
+    HandleResponse(pathsArr){
+        //Put function calls here
+    }
+
 
 }
 
