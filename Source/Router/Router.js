@@ -16,7 +16,7 @@
  */
 //Node Dependencies
 const _fs = require('fs');
-const Data = require('../Data/Data.js');
+const _path = require('path');
 
 //Internal Dependencies
 const _data = require('../Data/Data.js');
@@ -71,7 +71,8 @@ const _userController = require('../Areas/User/UserController.js');
         let allPathsArr = this.GetAllPathsArr();
         switch(allPathsArr[1]){
             case undefined:
-                this.DataObj.Read('../', 'index', (err, data) => {
+                let indexPathStr = _path.join('./', '../');
+                this.DataObj.Read(indexPathStr, 'index', (err, data) => {
                     if(err){
                         console.error(err);
                         this.SendResponse(500, '\nInternal Server Error', undefined);

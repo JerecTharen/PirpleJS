@@ -168,7 +168,7 @@ class Data{
     }
 
     GetFilePathString(dirNameStr, fileNameStr, extentionStr = 'json'){
-        return `${this.BASE_DIR_STR}/${dirNameStr}/${fileNameStr}.${extentionStr}`;
+        return _path.join(this.BASE_DIR_STR, dirNameStr, `${fileNameStr}.${extentionStr}`);
     }
 }
 

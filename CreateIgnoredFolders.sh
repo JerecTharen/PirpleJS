@@ -21,10 +21,10 @@ cd ".HTTPS"
 echo "In .HTTPS, creating ssl: "
 
 country=US
-state=#put state here
-locality=#put city here
-commonName=#put last name here
-email=#put email here
+state=FL
+locality=Tallahassee
+commonName=Bennett
+email=kf7ags@gmail.com
 
 echo "Using subj: "
 echo "/C=$country/ST=$state/L=$locality/CN=$commonName/emailAddress=$email"
